@@ -1,22 +1,14 @@
 package main
 
 import (
-	"fmt"
+	"fileserverapi/internal/router"
 	"log"
 	"net/http"
 )
 
 func main() {
-	http.HandleFunc("/", handleHello)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	r := router.Setup()
 
-}
-func handleHello(w http.ResponseWriter, _ *http.Request) {
-	wc, err := w.Write([]byte("Hello world"))
-	if err != nil {
-		log.Fatal("error writing response", err)
-		return
-	}
-	fmt.Println(wc)
-
+	log.Println("Server läuft auf :8080")
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
