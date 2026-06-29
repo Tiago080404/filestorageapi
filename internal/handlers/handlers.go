@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"fmt"
+	"fileserverapi/internal/storage"
 	"net/http"
 )
 
@@ -20,7 +20,11 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	fmt.Println(header.Filename)
-	fmt.Println(header.Size)
 	w.Write([]byte("Upload received"))
+
+	err = storage.UploadLocal(&file, header.Filename)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 }
