@@ -21,15 +21,19 @@ type FileInfo struct {
 
 var mockDirPath = "/home/tiago/testneu"
 
-func UploadLocal(file *multipart.File, fileName string) error {
-	buf := bytes.NewBuffer(nil)
-	_, err := io.Copy(buf, *file)
+func UploadLocal(fileHeader *multipart.FileHeader) error {
+	path := filepath.Join("/home/tiago/Downloads/", fileHeader.Filename)
+	dst, err := os.Create(path)
 	if err != nil {
 		return err
 	}
 
-	path := filepath.Join("/home/tiago/Downloads/", fileName)
-	return os.WriteFile(path, buf.Bytes(), 0644)
+	file, err := fileHeader.Open()
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(dst, file)
+	return err
 }
 
 func GetDir() ([]byte, error) {

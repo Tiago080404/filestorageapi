@@ -13,21 +13,18 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	files := r.MultipartForm.File["files[]"]
 
-	file, header, err := r.FormFile("file")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	for _, fileHeader := range files {
+		err = storage.UploadLocal(fileHeader)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 	}
-	defer file.Close()
 
 	w.Write([]byte("Upload received"))
 
-	err = storage.UploadLocal(&file, header.Filename)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
 }
 
 func List(w http.ResponseWriter, r *http.Request) {
