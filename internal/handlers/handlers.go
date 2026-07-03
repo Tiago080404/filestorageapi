@@ -4,6 +4,7 @@ import (
 	"fileserverapi/internal/storage"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func Upload(w http.ResponseWriter, r *http.Request) {
@@ -50,4 +51,17 @@ func Thumbnail(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "image/jpeg")
 	w.Write(data)
+}
+
+func Download(w http.ResponseWriter, r *http.Request) {
+	files := r.PathValue("files")
+	downloadedFiles, err := storage.DownloadFiles(strings.Split(files, "/"))
+	if err != nil {
+		log.Println("could not download files: ", err)
+		http.Error(w, "could not download files", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/zip")
+	w.Write(downloadedFiles)
 }

@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"archive/zip"
 	"bytes"
 	"encoding/json"
 	"image"
@@ -19,11 +20,11 @@ type FileInfo struct {
 	Url  string `json:"url"`
 }
 
-var mockDirPath = "/home/tiago/testneu"
+var mockDirPath = "/home/tiago/fileservertest/"
 var thumbnailPath = "/home/tiago/fileservertest/thumbnails"
 
 func UploadLocal(fileHeader *multipart.FileHeader) error {
-	path := filepath.Join("/home/tiago/Downloads/", fileHeader.Filename)
+	path := filepath.Join(mockDirPath, fileHeader.Filename)
 	dst, err := os.Create(path)
 	if err != nil {
 		return err
@@ -39,7 +40,7 @@ func UploadLocal(fileHeader *multipart.FileHeader) error {
 
 func GetDir() ([]byte, error) {
 	var infos []FileInfo
-	dir, err := os.ReadDir("/home/tiago/testneu")
+	dir, err := os.ReadDir(mockDirPath)
 	if err != nil {
 		log.Fatal("could not open dir", err)
 		return nil, err
@@ -131,4 +132,37 @@ func thumbnailExists(name string) bool {
 	}
 
 	return true
+}
+
+func DownloadFiles(files []string) ([]byte, error) {
+	buf := new(bytes.Buffer)
+	zw := zip.NewWriter(buf)
+
+	for _, fileName := range files {
+		file, err := os.Open(filepath.Join(mockDirPath, fileName))
+		if err != nil {
+			log.Println("could not open file to download: ", err)
+			continue
+		}
+
+		w, err := zw.Create(fileName)
+		if err != nil {
+			file.Close()
+			log.Println("could not create zip for file: ", fileName)
+			log.Println(err)
+			continue
+		}
+		_, err = io.Copy(w, file)
+		if err != nil {
+			file.Close()
+			log.Println("Could not copy the file to the zip: ", err)
+			continue
+		}
+		file.Close()
+	}
+
+	if err := zw.Close(); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
