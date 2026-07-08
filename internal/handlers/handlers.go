@@ -1,11 +1,18 @@
 package handlers
 
 import (
+	"encoding/json"
+	"fileserverapi/internal/auth"
 	"fileserverapi/internal/storage"
 	"log"
 	"net/http"
 	"strings"
 )
+
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
 
 func Upload(w http.ResponseWriter, r *http.Request) {
 
@@ -64,4 +71,30 @@ func Download(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/zip")
 	w.Write(downloadedFiles)
+}
+
+func Authenticate(w http.ResponseWriter, r *http.Request) {
+
+	var req LoginRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+	}
+
+	token, err := auth.Authenticate(req.Username, req.Password)
+	if err != nil {
+		w.WriteHeader(http.StatusForbidden)
+	}
+
+	cookie := http.Cookie{
+		Name:     "auth",
+		Value:    token,
+		Path:     "/",
+		MaxAge:   3600,
+		HttpOnly: true,
+		Secure:   r.URL.Scheme == "https",
+		SameSite: http.SameSiteLaxMode,
+		Domain:   "localhost",
+	}
+	http.SetCookie(w, &cookie)
+	w.WriteHeader(http.StatusOK)
 }

@@ -42,7 +42,7 @@ func GetDir() ([]byte, error) {
 	var infos []FileInfo
 	dir, err := os.ReadDir(mockDirPath)
 	if err != nil {
-		log.Fatal("could not open dir", err)
+		log.Printf("could not open dir: %s", err)
 		return nil, err
 	}
 
@@ -55,7 +55,7 @@ func GetDir() ([]byte, error) {
 
 	byteFiles, err := json.Marshal(infos)
 	if err != nil {
-		log.Fatal("could not marshal to json", err)
+		log.Printf("could not marshal to json: %s", err)
 		return nil, err
 	}
 
@@ -68,7 +68,7 @@ func MakeThumbnail(path string) ([]byte, error) { //refactoren func name passt n
 		file, _ := os.Open(filepath.Join(thumbnailPath, path))
 		img, _, err := image.Decode(file)
 		if err != nil {
-			log.Fatal("could not open file", err)
+			log.Printf("could not open file: %s", err)
 			return nil, err
 		}
 
@@ -80,14 +80,14 @@ func MakeThumbnail(path string) ([]byte, error) { //refactoren func name passt n
 
 		file, err := os.Open(filepath.Join(mockDirPath, path))
 		if err != nil {
-			log.Fatal("could not open file", err)
+			log.Printf("could not open file: %s", err)
 			return nil, err
 		}
 		defer file.Close()
 
 		image, _, err := image.Decode(file)
 		if err != nil {
-			log.Fatal("could not decode image", err)
+			log.Printf("could not decode image: %s", err)
 			return nil, err
 		}
 
@@ -97,10 +97,10 @@ func MakeThumbnail(path string) ([]byte, error) { //refactoren func name passt n
 
 		var buffer bytes.Buffer
 		imaging.Encode(&buffer, thumbnail, imaging.JPEG)
-		log.Println("copy to path", thumbnailPath)
+
 		_, err = io.Copy(pathh, &buffer)
 		if err != nil {
-			log.Fatal("Could not copy thumbnail into folder: ", err)
+			log.Printf("Could not copy thumbnail into folder: %s", err)
 			return nil, err
 		}
 
@@ -134,7 +134,7 @@ func thumbnailExists(name string) bool {
 	return true
 }
 
-func DownloadFiles(files []string) ([]byte, error) {
+func DownloadFiles(files []string) ([]byte, error) { //todo: change later without zip
 	buf := new(bytes.Buffer)
 	zw := zip.NewWriter(buf)
 
