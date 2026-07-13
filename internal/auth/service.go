@@ -13,7 +13,7 @@ import (
 var sampleSecretKey = []byte("hgfsgndsbvdshbv")
 var ErrInvalidCredentials = errors.New("invalid credentials")
 
-func Authenticate(username string, password string) (string, error) {
+func Authenticate(username string, password string) (string, error) { //db erstellen mit user (schreiben,dass der benutzer nur in seine dir gehenn kann)
 	if username != "test" || password != "test" {
 		return "", ErrInvalidCredentials
 	}
