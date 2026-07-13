@@ -6,7 +6,6 @@ import (
 	"fileserverapi/internal/storage"
 	"log"
 	"net/http"
-	"strings"
 )
 
 type LoginRequest struct {
@@ -62,15 +61,15 @@ func Thumbnail(w http.ResponseWriter, r *http.Request) {
 
 func Download(w http.ResponseWriter, r *http.Request) {
 	files := r.PathValue("files")
-	downloadedFiles, err := storage.DownloadFiles(strings.Split(files, "/"))
+	downloadedFile, err := storage.DownloadFiles(files)
 	if err != nil {
 		log.Println("could not download files: ", err)
 		http.Error(w, "could not download files", http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/zip")
-	w.Write(downloadedFiles)
+	w.Header().Set("Content-Type", "image/png")
+	w.Write(downloadedFile)
 }
 
 func Authenticate(w http.ResponseWriter, r *http.Request) {

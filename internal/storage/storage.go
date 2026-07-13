@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"archive/zip"
 	"bytes"
 	"encoding/json"
 	"image"
@@ -134,35 +133,11 @@ func thumbnailExists(name string) bool {
 	return true
 }
 
-func DownloadFiles(files []string) ([]byte, error) { //todo: change later without zip
-	buf := new(bytes.Buffer)
-	zw := zip.NewWriter(buf)
-
-	for _, fileName := range files {
-		file, err := os.Open(filepath.Join(mockDirPath, fileName))
-		if err != nil {
-			log.Println("could not open file to download: ", err)
-			continue
-		}
-
-		w, err := zw.Create(fileName)
-		if err != nil {
-			file.Close()
-			log.Println("could not create zip for file: ", fileName)
-			log.Println(err)
-			continue
-		}
-		_, err = io.Copy(w, file)
-		if err != nil {
-			file.Close()
-			log.Println("Could not copy the file to the zip: ", err)
-			continue
-		}
-		file.Close()
-	}
-
-	if err := zw.Close(); err != nil {
+func DownloadFiles(file string) ([]byte, error) {
+	data, err := os.ReadFile(filepath.Join(mockDirPath, file))
+	if err != nil {
 		return nil, err
 	}
-	return buf.Bytes(), nil
+
+	return data, nil
 }
