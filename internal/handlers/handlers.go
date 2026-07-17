@@ -6,11 +6,17 @@ import (
 	"fileserverapi/internal/storage"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 )
 
 type LoginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+}
+
+type NewDir struct {
+	Name string `json:"name"`
 }
 
 func Upload(w http.ResponseWriter, r *http.Request) {
@@ -60,16 +66,36 @@ func Thumbnail(w http.ResponseWriter, r *http.Request) {
 }
 
 func Download(w http.ResponseWriter, r *http.Request) {
+	var mockDirPath = "/home/tiago/fileservertest/"
+
 	files := r.PathValue("files")
-	downloadedFile, err := storage.DownloadFiles(files)
+	stat, err := os.Stat(filepath.Join(mockDirPath, files))
 	if err != nil {
-		log.Println("could not download files: ", err)
-		http.Error(w, "could not download files", http.StatusInternalServerError)
-		return
+		log.Println("could not read stat")
+	}
+	if stat.IsDir() {
+		folder, err := storage.DownloadFolder(files)
+		if err != nil {
+			log.Println("Could not download folder")
+			http.Error(w, "could not download folder", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/zip")
+		w.Write(folder)
+
+	} else {
+		downloadedFile, err := storage.DownloadFiles(files)
+		if err != nil {
+			log.Println("could not download files: ", err)
+			http.Error(w, "could not download files", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "image/png")
+		w.Write(downloadedFile)
 	}
 
-	w.Header().Set("Content-Type", "image/png")
-	w.Write(downloadedFile)
 }
 
 func Authenticate(w http.ResponseWriter, r *http.Request) {
@@ -96,4 +122,19 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &cookie)
 	w.WriteHeader(http.StatusOK)
+}
+
+func CreateDir(w http.ResponseWriter, r *http.Request) {
+	var req NewDir
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return
+	}
+
+	err = storage.MakeNewDir(req.Name)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	w.WriteHeader(http.StatusCreated)
 }

@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"archive/zip"
 	"bytes"
 	"encoding/json"
 	"image"
@@ -140,4 +141,51 @@ func DownloadFiles(file string) ([]byte, error) {
 	}
 
 	return data, nil
+
+}
+
+func DownloadFolder(folder string) ([]byte, error) {
+	dir, err := os.ReadDir(filepath.Join(mockDirPath, folder))
+	if err != nil {
+		return nil, err
+	}
+
+	buf := new(bytes.Buffer)
+	w := zip.NewWriter(buf)
+	for _, entry := range dir {
+		file, err := w.Create(entry.Name())
+		if err != nil {
+			log.Println("Coulkd not crate file zip")
+			return nil, err
+		}
+		data, err := os.ReadFile(filepath.Join(mockDirPath, folder, entry.Name()))
+		if err != nil {
+			log.Println("could not read file")
+			return nil, err
+
+		}
+
+		_, err = file.Write(data)
+		if err != nil {
+			log.Println("could not write in zip file")
+			return nil, err
+		}
+
+	}
+	err = w.Close()
+	if err != nil {
+		log.Println("could not close w: ", err)
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func MakeNewDir(dir string) error {
+	err := os.Mkdir(filepath.Join(mockDirPath, dir), 0750)
+	if err != nil {
+		log.Println("Could not create dir: ", err)
+		return err
+	}
+	return err
 }

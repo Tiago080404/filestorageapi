@@ -99,13 +99,22 @@ func main() {
 	}
 	fmt.Printf("Listening on %v\n", listener.Addr())
 
-	nConn, err := listener.Accept()
-	if err != nil {
-		log.Println("failed to accept incoming connection", err)
-		return
+	for {
+		nConn, err := listener.Accept()
+		if err != nil {
+			log.Println("failed to accept incoming connection", err)
+			return
+		}
+		go HandleConn(nConn, config)
 	}
 
-	HandleConn(nConn, config)
+	/* 	nConn, err := listener.Accept()
+	   	if err != nil {
+	   		log.Println("failed to accept incoming connection", err)
+	   		return
+	   	}
+
+	HandleConn(nConn, config)*/
 }
 
 func HandleConn(nConn net.Conn, config *ssh.ServerConfig) {
@@ -122,11 +131,13 @@ func HandleConn(nConn net.Conn, config *ssh.ServerConfig) {
 	for newChannel := range chans {
 		if newChannel.ChannelType() != "session" {
 			newChannel.Reject(ssh.UnknownChannelType, "unknown channel")
+			log.Println("rejected")
 			continue
 		}
 
 		channel, requests, err := newChannel.Accept()
 		if err != nil {
+			log.Println(err)
 			continue
 		}
 		go HandleSession(channel, requests, sshConn, sshConn.Permissions.Extensions["home"])
