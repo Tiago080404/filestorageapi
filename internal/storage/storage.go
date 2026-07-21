@@ -35,6 +35,13 @@ func UploadLocal(fileHeader *multipart.FileHeader) error {
 		return err
 	}
 	_, err = io.Copy(dst, file)
+
+	if thumbnailExists(fileHeader.Filename) {
+		log.Println("Thumbnail already exists")
+	} else {
+		createThumbnail(fileHeader.Filename)
+	}
+
 	return err
 }
 
@@ -61,57 +68,42 @@ func GetDir() ([]byte, error) {
 
 	return byteFiles, nil
 }
+func createThumbnail(fileName string) error {
+	log.Println("thumbnail does not exists")
 
-func MakeThumbnail(path string) ([]byte, error) { //refactoren func name passt nicht mehr
-	if thumbnailExists(path) {
-		log.Println("thumbnail already exists: ", thumbnailPath, path)
-		file, _ := os.Open(filepath.Join(thumbnailPath, path))
-		img, _, err := image.Decode(file)
-		if err != nil {
-			log.Printf("could not open file: %s", err)
-			return nil, err
-		}
-
-		var buf bytes.Buffer
-		jpeg.Encode(&buf, img, &jpeg.Options{Quality: 80})
-		return buf.Bytes(), nil
-	} else {
-		log.Println("thumbnail does not exists")
-
-		file, err := os.Open(filepath.Join(mockDirPath, path))
-		if err != nil {
-			log.Printf("could not open file: %s", err)
-			return nil, err
-		}
-		defer file.Close()
-
-		image, _, err := image.Decode(file)
-		if err != nil {
-			log.Printf("could not decode image: %s", err)
-			return nil, err
-		}
-
-		thumbnail := imaging.Resize(image, 150, 150, imaging.Lanczos)
-
-		pathh, _ := os.Create(filepath.Join(thumbnailPath, path))
-
-		var buffer bytes.Buffer
-		imaging.Encode(&buffer, thumbnail, imaging.JPEG)
-
-		_, err = io.Copy(pathh, &buffer)
-		if err != nil {
-			log.Printf("Could not copy thumbnail into folder: %s", err)
-			return nil, err
-		}
-
-		buf, err := encodeJpeg(thumbnail)
-		if err != nil {
-			log.Printf("could not encode jpeg for %s: %v", path, err)
-			return nil, err
-		}
-
-		return buf, nil
+	file, err := os.Open(filepath.Join(mockDirPath, fileName))
+	if err != nil {
+		log.Printf("could not open file: %s", err)
+		return err
 	}
+	defer file.Close()
+
+	image, _, err := image.Decode(file)
+	if err != nil {
+		log.Printf("could not decode image: %s", err)
+		return err
+	}
+
+	thumbnail := imaging.Resize(image, 150, 150, imaging.Lanczos)
+
+	pathh, _ := os.Create(filepath.Join(thumbnailPath, fileName))
+
+	var buffer bytes.Buffer
+	imaging.Encode(&buffer, thumbnail, imaging.JPEG)
+
+	_, err = io.Copy(pathh, &buffer)
+	if err != nil {
+		log.Printf("Could not copy thumbnail into folder: %s", err)
+		return err
+	}
+
+	_, err = encodeJpeg(thumbnail)
+	if err != nil {
+		log.Printf("could not encode jpeg for %s: %v", fileName, err)
+		return err
+	}
+
+	return nil
 }
 
 func encodeJpeg(img image.Image) ([]byte, error) {

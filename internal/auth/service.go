@@ -10,7 +10,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var sampleSecretKey = []byte("hgfsgndsbvdshbv")
 var ErrInvalidCredentials = errors.New("invalid credentials")
 
 func Authenticate(username string, password string) (string, error) { //db erstellen mit user (schreiben,dass der benutzer nur in seine dir gehenn kann)

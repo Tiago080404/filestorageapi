@@ -107,14 +107,6 @@ func main() {
 		}
 		go HandleConn(nConn, config)
 	}
-
-	/* 	nConn, err := listener.Accept()
-	   	if err != nil {
-	   		log.Println("failed to accept incoming connection", err)
-	   		return
-	   	}
-
-	HandleConn(nConn, config)*/
 }
 
 func HandleConn(nConn net.Conn, config *ssh.ServerConfig) {
