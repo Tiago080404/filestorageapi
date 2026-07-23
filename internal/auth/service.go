@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"crypto/rsa"
 	"errors"
 	"log"
 	"net/http"
@@ -8,40 +9,34 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var ErrInvalidCredentials = errors.New("invalid credentials")
+var pubToken *rsa.PrivateKey
 
-func Authenticate(username string, password string) (string, error) { //db erstellen mit user (schreiben,dass der benutzer nur in seine dir gehenn kann)
-	if username != "test" || password != "test" {
-		return "", ErrInvalidCredentials
-	}
-
-	t, err := generateJWT(username)
+func Init() error {
+	privateKey, err := os.ReadFile("../../token.pem")
 	if err != nil {
-		log.Printf("Could not generate jwt: %s", err)
-		return "", nil
+		log.Println("Could not read public key")
+		return err
 	}
-	return t, nil
 
+	pub, err := jwt.ParseRSAPrivateKeyFromPEM(privateKey)
+	if err != nil {
+		return err
+	}
+
+	pubToken = pub
+	return nil
 }
-
-func generateJWT(username string) (string, error) {
+func GenerateJWT(username string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.RegisteredClaims{
 		Subject:   username,
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(10 * time.Minute)),
 	})
 
-	pubToken, err := os.ReadFile("../../token.pem")
-	if err != nil {
-		log.Println("Could not read public key")
-		return "", err
-	}
-	pub, err := jwt.ParseRSAPrivateKeyFromPEM(pubToken)
-	if err != nil {
-		return "", err
-	}
-	return token.SignedString(pub)
+	return token.SignedString(pubToken)
 }
 
 func ProtectedRoutes(handler func(w http.ResponseWriter, r *http.Request)) func(http.ResponseWriter, *http.Request) {
@@ -53,7 +48,7 @@ func ProtectedRoutes(handler func(w http.ResponseWriter, r *http.Request)) func(
 			return
 		}
 
-		if !verifyJWT(cookie.Value) {
+		if !VerifyJWT(cookie.Value) {
 			w.WriteHeader(401)
 			return
 		}
@@ -61,7 +56,7 @@ func ProtectedRoutes(handler func(w http.ResponseWriter, r *http.Request)) func(
 	}
 }
 
-func verifyJWT(cookie string) bool {
+func VerifyJWT(cookie string) bool {
 	_, err := jwt.Parse(cookie, func(t *jwt.Token) (any, error) {
 		privateKey, err := os.ReadFile("../../token.pub")
 		if err != nil {
@@ -75,4 +70,8 @@ func verifyJWT(cookie string) bool {
 	}
 
 	return true
+}
+
+func CheckPasswordHash(hashedPw string, password string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPw), []byte(password)) == nil
 }

@@ -14,5 +14,6 @@ func Setup() *http.ServeMux {
 	mux.HandleFunc("/api/download/{files...}", auth.ProtectedRoutes(handlers.Download))
 	mux.HandleFunc("/api/login", handlers.Authenticate)
 	mux.HandleFunc("/api/dir/create", handlers.CreateDir)
+	mux.HandleFunc("/api/register", handlers.Register)
 	return mux
 }

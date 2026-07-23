@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-	"fileserverapi/internal/auth"
+	"fileserverapi/internal/database"
 	"fileserverapi/internal/storage"
 	"log"
 	"net/http"
@@ -88,11 +88,14 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 	var req LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
-	token, err := auth.Authenticate(req.Username, req.Password)
+	token, err := database.Authenticate(req.Username, req.Password)
 	if err != nil {
 		w.WriteHeader(http.StatusForbidden)
+		return
 	}
 
 	cookie := http.Cookie{
@@ -122,4 +125,15 @@ func CreateDir(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
+}
+
+func Register(w http.ResponseWriter, r *http.Request) {
+	var registerReq LoginRequest //type is the same
+
+	err := json.NewDecoder(r.Body).Decode(&registerReq)
+	if err != nil {
+		return
+	}
+
+	database.CreateUser(registerReq.Username, registerReq.Password)
 }
