@@ -18,6 +18,7 @@ import (
 type FileInfo struct {
 	Name string `json:"name"`
 	Url  string `json:"url"`
+	Dir  bool   `json:"dir"`
 }
 
 var mockDirPath = "/home/tiago/fileservertest/"
@@ -55,9 +56,10 @@ func GetDir() ([]byte, error) {
 
 	for _, file := range dir {
 		if file.IsDir() {
-			continue
+			infos = append(infos, FileInfo{Name: file.Name(), Url: "", Dir: true})
+		} else {
+			infos = append(infos, FileInfo{Name: file.Name(), Url: "/thumbnail/" + file.Name(), Dir: false})
 		}
-		infos = append(infos, FileInfo{Name: file.Name(), Url: "/thumbnail/" + file.Name()})
 	}
 
 	byteFiles, err := json.Marshal(infos)
