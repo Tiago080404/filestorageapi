@@ -183,3 +183,16 @@ func MakeNewDir(dir string) error {
 	}
 	return err
 }
+
+func MoveFile(old string, dest string) error {
+	log.Println(filepath.Join(mockDirPath, old))
+	log.Println(filepath.Join(mockDirPath, dest))
+
+	err := os.Rename(filepath.Join(mockDirPath, old), filepath.Join(mockDirPath, dest, "/", old))
+	if err != nil {
+		log.Println("Could not move the file")
+		return err
+	}
+
+	return nil
+}

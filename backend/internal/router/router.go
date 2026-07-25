@@ -15,5 +15,6 @@ func Setup() *http.ServeMux {
 	mux.HandleFunc("/api/login", handlers.Authenticate)
 	mux.HandleFunc("/api/dir/create", handlers.CreateDir)
 	mux.HandleFunc("/api/register", handlers.Register)
+	mux.HandleFunc("/api/move/{file}/{dest}", handlers.MoveData)
 	return mux
 }

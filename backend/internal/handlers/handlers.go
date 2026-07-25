@@ -50,7 +50,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	w.Write(dir)
 }
 
-func Download(w http.ResponseWriter, r *http.Request) {
+func Download(w http.ResponseWriter, r *http.Request) { //bug wahrscheinlich wenn im folder noch ein folder ist
 	var mockDirPath = "/home/tiago/fileservertest/"
 
 	files := r.PathValue("files")
@@ -136,4 +136,18 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	database.CreateUser(registerReq.Username, registerReq.Password)
+}
+
+func MoveData(w http.ResponseWriter, r *http.Request) {
+	data := r.PathValue("file")
+	dest := r.PathValue("dest")
+
+	err := storage.MoveFile(data, dest)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Moved data"))
 }
