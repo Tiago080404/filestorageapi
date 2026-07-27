@@ -139,40 +139,53 @@ func DownloadFiles(file string) ([]byte, error) {
 }
 
 func DownloadFolder(folder string) ([]byte, error) {
-	dir, err := os.ReadDir(filepath.Join(mockDirPath, folder))
+	buf := new(bytes.Buffer)
+	w := zip.NewWriter(buf)
+
+	err := addDirToZip(w, folder, "")
 	if err != nil {
 		return nil, err
 	}
 
-	buf := new(bytes.Buffer)
-	w := zip.NewWriter(buf)
-	for _, entry := range dir {
-		file, err := w.Create(entry.Name())
-		if err != nil {
-			log.Println("Coulkd not crate file zip")
-			return nil, err
-		}
-		data, err := os.ReadFile(filepath.Join(mockDirPath, folder, entry.Name()))
-		if err != nil {
-			log.Println("could not read file")
-			return nil, err
-
-		}
-
-		_, err = file.Write(data)
-		if err != nil {
-			log.Println("could not write in zip file")
-			return nil, err
-		}
-
-	}
 	err = w.Close()
 	if err != nil {
-		log.Println("could not close w: ", err)
+		log.Println("Could not close w:", err)
 		return nil, err
 	}
 
 	return buf.Bytes(), nil
+}
+
+func addDirToZip(w *zip.Writer, folder string, zipPath string) error {
+	entries, err := os.ReadDir(filepath.Join(mockDirPath, folder))
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			err := addDirToZip(w, filepath.Join(folder, entry.Name()), filepath.Join(zipPath, entry.Name()))
+			if err != nil {
+				return err
+			}
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(mockDirPath, folder, entry.Name()))
+		if err != nil {
+			return err
+		}
+
+		zippedName, err := w.Create(filepath.Join(zipPath, entry.Name()))
+		if err != nil {
+			return err
+		}
+
+		_, err = zippedName.Write(data)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func MakeNewDir(dir string) error {
@@ -190,7 +203,7 @@ func MoveFile(old string, dest string) error {
 
 	err := os.Rename(filepath.Join(mockDirPath, old), filepath.Join(mockDirPath, dest, "/", old))
 	if err != nil {
-		log.Println("Could not move the file")
+		log.Println("Could not move the file", err)
 		return err
 	}
 

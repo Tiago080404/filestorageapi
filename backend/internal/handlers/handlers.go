@@ -50,7 +50,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	w.Write(dir)
 }
 
-func Download(w http.ResponseWriter, r *http.Request) { //bug wahrscheinlich wenn im folder noch ein folder ist
+func Download(w http.ResponseWriter, r *http.Request) {
 	var mockDirPath = "/home/tiago/fileservertest/"
 
 	files := r.PathValue("files")
@@ -58,6 +58,7 @@ func Download(w http.ResponseWriter, r *http.Request) { //bug wahrscheinlich wen
 	if err != nil {
 		log.Println("could not read stat")
 	}
+
 	if stat.IsDir() {
 		folder, err := storage.DownloadFolder(files)
 		if err != nil {
@@ -68,7 +69,6 @@ func Download(w http.ResponseWriter, r *http.Request) { //bug wahrscheinlich wen
 
 		w.Header().Set("Content-Type", "application/zip")
 		w.Write(folder)
-
 	} else {
 		downloadedFile, err := storage.DownloadFiles(files)
 		if err != nil {
