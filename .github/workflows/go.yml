@@ -23,6 +23,6 @@ jobs:
     - name: Install dependencies
       run: |
         cd backend 
-        go install .
+        go install ./...
     - name: Build
       run: go build -v ./...
