@@ -84,8 +84,8 @@ func Download(w http.ResponseWriter, r *http.Request) {
 }
 
 func Authenticate(w http.ResponseWriter, r *http.Request) {
-
 	var req LoginRequest
+
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -138,7 +138,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	database.CreateUser(registerReq.Username, registerReq.Password)
 }
 
-func MoveData(w http.ResponseWriter, r *http.Request) {
+func MoveData(w http.ResponseWriter, r *http.Request) { //kann das auch in body tun ist ja kein get
 	data := r.PathValue("file")
 	dest := r.PathValue("dest")
 
@@ -150,4 +150,22 @@ func MoveData(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Moved data"))
+}
+
+func Rename(w http.ResponseWriter, r *http.Request) {
+	var newName struct {
+		NewName string `json:"newname"`
+		OldPath string `json:"oldpath"`
+	}
+
+	json.NewDecoder(r.Body).Decode(&newName)
+	log.Println(newName.OldPath, newName.NewName)
+
+	err := storage.RenameData(newName.NewName, newName.OldPath)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

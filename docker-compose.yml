@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+      POSTGRES_DB: fileserver
+    ports:
+      - "5432:5432"
+    volumes:
+      - fileserver_postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    user: "1000:1000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: db
+      PGPASSWORD: ${PGPASSWORD}
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend/token.pem:/token.pem:ro
+      - ./backend/token.pub:/token.pub:ro
+      - /home/tiago/fileservertest:/home/tiago/fileservertest
+
+volumes:
+  fileserver_postgres_data:
+    external: true
+    name: fcd96faaac4e4644434af649036bc793b665207f0c7f0a7ea8ec162056197439

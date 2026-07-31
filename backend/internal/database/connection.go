@@ -16,11 +16,18 @@ type Store struct {
 var DB *sql.DB
 
 var (
-	host     = "localhost"
+	host     = getEnvOrDefault("DB_HOST", "localhost")
 	port     = 5432
 	password = ""
 	dbname   = "fileserver"
 )
+
+func getEnvOrDefault(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
+}
 
 func Conn() error {
 	password = os.Getenv("PGPASSWORD")

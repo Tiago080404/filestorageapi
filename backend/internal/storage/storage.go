@@ -10,6 +10,7 @@ import (
 	"log"
 	"mime/multipart"
 	"os"
+	"path"
 	"path/filepath"
 
 	"github.com/disintegration/imaging"
@@ -204,6 +205,26 @@ func MoveFile(old string, dest string) error {
 	err := os.Rename(filepath.Join(mockDirPath, old), filepath.Join(mockDirPath, dest, "/", old))
 	if err != nil {
 		log.Println("Could not move the file", err)
+		return err
+	}
+
+	return nil
+}
+
+func RenameData(newNamePath string, oldPath string) error {
+	err := os.Rename(oldPath, newNamePath)
+
+	if err != nil {
+		log.Println("Could not rename")
+		return err
+	}
+
+	_, file := filepath.Split(oldPath)
+	_, newNameThumbnail := filepath.Split(newNamePath)
+
+	err = os.Rename(path.Join(thumbnailPath, file), path.Join(thumbnailPath, newNameThumbnail))
+	if err != nil {
+		log.Println("Could not rename")
 		return err
 	}
 

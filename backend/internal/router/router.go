@@ -16,5 +16,6 @@ func Setup() *http.ServeMux {
 	mux.HandleFunc("/api/dir/create", handlers.CreateDir)
 	mux.HandleFunc("/api/register", handlers.Register)
 	mux.HandleFunc("/api/move/{file}/{dest}", handlers.MoveData)
+	mux.HandleFunc("/api/rename", handlers.Rename)
 	return mux
 }

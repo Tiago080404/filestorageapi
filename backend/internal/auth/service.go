@@ -16,7 +16,12 @@ var ErrInvalidCredentials = errors.New("invalid credentials")
 var pubToken *rsa.PrivateKey
 
 func Init() error {
-	privateKey, err := os.ReadFile("../../token.pem")
+	keyPath := os.Getenv("TOKEN_PEM_PATH")
+	if keyPath == "" {
+		keyPath = "../../token.pem"
+	}
+
+	privateKey, err := os.ReadFile(keyPath)
 	if err != nil {
 		log.Println("Could not read public key")
 		return err
