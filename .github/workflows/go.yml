@@ -30,4 +30,5 @@ jobs:
         go build -v ./...
     - name: Test
       run: |
+        cd backend
         go test
