@@ -116,12 +116,14 @@ func CreateDir(w http.ResponseWriter, r *http.Request) {
 	var req NewDir
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	err = storage.MakeNewDir(req.Name)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
@@ -139,10 +141,16 @@ func Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func MoveData(w http.ResponseWriter, r *http.Request) { //kann das auch in body tun ist ja kein get
-	data := r.PathValue("file")
-	dest := r.PathValue("dest")
+	/* 	data := r.PathValue("file")
+	   	dest := r.PathValue("dest") */
 
-	err := storage.MoveFile(data, dest)
+	var dataMove struct {
+		Data string `json:"file"`
+		Dest string `json:"dest"`
+	}
+
+	json.NewDecoder(r.Body).Decode(&dataMove)
+	err := storage.MoveFile(dataMove.Data, dataMove.Dest)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -167,5 +175,19 @@ func Rename(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.WriteHeader(http.StatusOK)
+}
+
+func Remove(w http.ResponseWriter, r *http.Request) {
+	var dataPath struct {
+		Path string `json:"path"`
+	}
+	json.NewDecoder(r.Body).Decode(&dataPath)
+
+	err := storage.RemoveData(dataPath.Path)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 }

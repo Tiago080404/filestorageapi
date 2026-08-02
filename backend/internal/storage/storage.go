@@ -230,3 +230,17 @@ func RenameData(newNamePath string, oldPath string) error {
 
 	return nil
 }
+
+func RemoveData(data string) error {
+	err := os.Remove(filepath.Join(mockDirPath, data))
+	if err != nil {
+		return err
+	}
+
+	err = os.Remove(filepath.Join(thumbnailPath, data))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
