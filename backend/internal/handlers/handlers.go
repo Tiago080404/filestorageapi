@@ -40,7 +40,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 }
 
 func List(w http.ResponseWriter, r *http.Request) {
-	dir, err := storage.GetDir()
+	dir, err := storage.GetHomeDir()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -190,4 +190,29 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func ListFolder(w http.ResponseWriter, r *http.Request) {
+	getDir := r.PathValue("path")
+
+	dir, err := storage.ListDir(getDir)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(dir)
+}
+func OpenFile(w http.ResponseWriter, r *http.Request) {
+	fileToOpen := r.PathValue("file")
+
+	openedFile, err := storage.OpenFile(fileToOpen)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(openedFile)
 }

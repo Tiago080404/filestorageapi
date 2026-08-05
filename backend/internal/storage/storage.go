@@ -20,6 +20,7 @@ type FileInfo struct {
 	Name string `json:"name"`
 	Url  string `json:"url"`
 	Dir  bool   `json:"dir"`
+	Path string `json:"path"`
 }
 
 var mockDirPath = "/home/tiago/fileservertest/"
@@ -47,7 +48,7 @@ func UploadLocal(fileHeader *multipart.FileHeader) error {
 	return err
 }
 
-func GetDir() ([]byte, error) {
+func GetHomeDir() ([]byte, error) {
 	var infos []FileInfo
 	dir, err := os.ReadDir(mockDirPath)
 	if err != nil {
@@ -57,9 +58,9 @@ func GetDir() ([]byte, error) {
 
 	for _, file := range dir {
 		if file.IsDir() {
-			infos = append(infos, FileInfo{Name: file.Name(), Url: "", Dir: true})
+			infos = append(infos, FileInfo{Name: file.Name(), Url: "", Dir: true, Path: file.Name()})
 		} else {
-			infos = append(infos, FileInfo{Name: file.Name(), Url: "/thumbnail/" + file.Name(), Dir: false})
+			infos = append(infos, FileInfo{Name: file.Name(), Url: "/thumbnail/" + file.Name(), Dir: false, Path: file.Name()})
 		}
 	}
 
@@ -243,4 +244,46 @@ func RemoveData(data string) error {
 	}
 
 	return nil
+}
+
+func ListDir(path string) ([]byte, error) {
+	var infos []FileInfo
+
+	basePath := "/home/tiago/fileservertest"
+	realPath := filepath.Join(basePath, path)
+
+	log.Println(realPath)
+	dir, err := os.ReadDir(realPath)
+	if err != nil {
+		log.Println("Could not read", err)
+		return nil, err
+	}
+
+	for _, file := range dir {
+		filePath := filepath.Join(path, file.Name())
+
+		if file.IsDir() {
+			infos = append(infos, FileInfo{file.Name(), "", true, filePath})
+		} else {
+			infos = append(infos, FileInfo{file.Name(), "/thumbnail/" + file.Name(), false, filePath})
+		}
+	}
+
+	data, err := json.Marshal(infos)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func OpenFile(path string) ([]byte, error) {
+	basePath := "/home/tiago/fileservertest"
+	realPath := filepath.Join(basePath, path)
+
+	file, err := os.ReadFile(realPath)
+	if err != nil {
+		log.Println("Could not read file", err)
+		return nil, err
+	}
+	return file, nil
 }
