@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import Datadisplayer from "./Datadisplayer.vue";
 interface DirData {
   name: string;
   url: string;
@@ -8,9 +9,7 @@ interface DirData {
 }
 let dirs = ref<DirData[]>([]);
 const selectedFile = ref("");
-const selectedVideo = ref("");
-const selectedImage = ref("");
-const selectedImageName = ref("");
+const fileType = ref("");
 
 onMounted(async () => {
   await getData();
@@ -30,36 +29,20 @@ const getDir = async (path: string) => {
   dirs.value = await response.json();
   console.log(dirs.value);
 };
-const openFile = async (file: string) => {
-  if (file.includes("pdf")) {
-    console.log("pdf");
-    selectedFile.value = `http://localhost:8080/api/open/${file}`;
-    selectedImage.value = "";
-    selectedVideo.value = "";
-  } else if (file.includes("MOV")) {
-    selectedVideo.value = `http://localhost:8080/api/open/${file}`;
-    selectedImage.value = "";
-    selectedFile.value = "";
+
+const selectFile = (path: string) => {
+  console.log(path);
+  selectedFile.value = path;
+  if (selectedFile.value.includes("pdf")) {
+    fileType.value = "pdf";
+  } else if (
+    selectedFile.value.includes("MOV") ||
+    selectedFile.value.includes("MP4")
+  ) {
+    fileType.value = "vid";
   } else {
-    selectedImage.value = `http://localhost:8080/api/open/${file}`;
-    selectedImageName.value = file;
-    selectedVideo.value = "";
-    selectedFile.value = "";
+    fileType.value = "img";
   }
-};
-const downloadFile = async (file: string) => {
-  const response = await fetch(`http://localhost:8080/api/download/${file}`, {
-    method: "GET",
-  });
-  const data = await response.blob();
-  const url = window.URL.createObjectURL(data);
-  const a = document.createElement("a");
-  a.href = url;
-  a.setAttribute("download",file)
-  document.body.appendChild(a);
-  a.click();
-   URL.revokeObjectURL(url);
-  document.body.removeChild(a); 
 };
 </script>
 <template>
@@ -73,7 +56,7 @@ const downloadFile = async (file: string) => {
         alt=""
       />
       <img
-        @click="openFile(data.path)"
+        @click="selectFile(data.path)"
         class="w-20 h-30"
         v-else
         src="../assets/file.svg"
@@ -81,23 +64,14 @@ const downloadFile = async (file: string) => {
       />
       <p class="w-20 text-center text-sm truncate">{{ data.name }}</p>
     </div>
-    <div v-if="selectedImage">
-     
-       <button @click="downloadFile(selectedImageName)">Download</button> 
-      <img v-if="selectedImage" :src="selectedImage" width="600" height="400" />
+
+    <div v-if="selectedFile">
+      <Datadisplayer
+        v-if="selectedFile"
+        :selected-file-name="selectedFile"
+        :file-type="fileType"
+        @close="selectFile('')"
+      ></Datadisplayer>
     </div>
-    <video
-      v-if="selectedVideo"
-      :src="selectedVideo"
-      controls
-      height="250"
-    ></video>
-    <iframe
-      v-if="selectedFile"
-      :src="selectedFile"
-      style="border: none"
-      width="100%"
-      height="600px"
-    ></iframe>
   </div>
 </template>
