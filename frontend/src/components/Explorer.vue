@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import Datadisplayer from "./Datadisplayer.vue";
+
 interface DirData {
   name: string;
   url: string;
@@ -10,29 +11,33 @@ interface DirData {
 let dirs = ref<DirData[]>([]);
 const selectedFile = ref("");
 const fileType = ref("");
+const onlyFilesData = ref<string[]>([]);
+let fileIdx = ref(0);
 
 onMounted(async () => {
   await getData();
+  getOnlyFiles();
 });
+
 const getData = async () => {
   const response = await fetch("http://localhost:8080/api/list", {
     method: "GET",
     //credentials: "include",
   });
   dirs.value = await response.json();
-  console.log(dirs);
 };
 const getDir = async (path: string) => {
   const response = await fetch(`http://localhost:8080/api/list/${path}`, {
     method: "GET",
   });
   dirs.value = await response.json();
-  console.log(dirs.value);
+  fileIdx.value = 0;
+  getOnlyFiles();
 };
 
 const selectFile = (path: string) => {
-  console.log(path);
   selectedFile.value = path;
+
   if (selectedFile.value.includes("pdf")) {
     fileType.value = "pdf";
   } else if (
@@ -43,6 +48,52 @@ const selectFile = (path: string) => {
   } else {
     fileType.value = "img";
   }
+
+  console.log("path in explorer", path, "idx", fileIdx.value);
+};
+
+const getOnlyFiles = () => {
+  onlyFilesData.value = [];
+  for (let i = 0; i < dirs.value.length; i++) {
+    if (dirs.value[i].dir === false) {
+      onlyFilesData.value.push(dirs.value[i].path);
+    }
+  }
+};
+const next = () => {
+  if (fileIdx.value === onlyFilesData.value.length - 1) {
+    return;
+  }
+  fileIdx.value += 1;
+  const dir = onlyFilesData.value[fileIdx.value];
+  console.log("next: ", dir);
+  selectFile(dir);
+};
+const backwards = () => {
+  if (fileIdx.value === 0) {
+    return;
+  }
+  fileIdx.value--;
+  const dir = onlyFilesData.value[fileIdx.value];
+  selectFile(dir);
+};
+
+const checkLastItem = computed(() => {
+  if (fileIdx.value === onlyFilesData.value.length - 1) {
+    return true;
+  }
+  return false;
+});
+const checkFirstItem = computed(() => {
+  if (fileIdx.value === 0) {
+    return true;
+  }
+  return false;
+});
+const closeViewer = () => {
+  selectedFile.value = "";
+  fileType.value = "";
+  fileIdx.value = 0;
 };
 </script>
 <template>
@@ -67,11 +118,28 @@ const selectFile = (path: string) => {
 
     <div v-if="selectedFile">
       <Datadisplayer
+        :key="selectedFile"
         v-if="selectedFile"
-        :selected-file-name="selectedFile"
+        :selectedFilePath="selectedFile"
         :file-type="fileType"
-        @close="selectFile('')"
+        @close="closeViewer"
       ></Datadisplayer>
+      <div class="fixed z-50 right-2 bottom-100">
+        <button @click="next" :class="{ disable: checkLastItem }">
+          Forward
+        </button>
+      </div>
+      <div class="fixed z-50 left-2 bottom-100">
+        <button @click="backwards" :class="{ disable: checkFirstItem }">
+          Backwards
+        </button>
+      </div>
     </div>
   </div>
 </template>
+<style>
+.disable {
+  color: blue;
+  font-weight: bold;
+}
+</style>

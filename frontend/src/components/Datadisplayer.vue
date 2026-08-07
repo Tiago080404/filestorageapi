@@ -2,14 +2,15 @@
 import { onMounted, ref } from "vue";
 
 const props = defineProps<{
-  selectedFileName: string;
+  selectedFilePath: string;
   fileType: string;
 }>();
-const emit = defineEmits(["close"]);
 
+const emit = defineEmits(["close"]);
 let file = ref("");
+
 const displayFile = async () => {
-  file.value = `http://localhost:8080/api/open/${props.selectedFileName}`;
+  file.value = `http://localhost:8080/api/open/${props.selectedFilePath}`;
   console.log(file.value, props.fileType);
 };
 
@@ -21,7 +22,7 @@ const close = () => {
 const downloadFile = async () => {
   console.log();
   const response = await fetch(
-    `http://localhost:8080/api/download/${props.selectedFileName}`,
+    `http://localhost:8080/api/download/${props.selectedFilePath}`,
     {
       method: "GET",
     },
@@ -35,7 +36,7 @@ const downloadFile = async () => {
     const url = window.URL.createObjectURL(file);
     const a = document.createElement("a");
     a.href = url;
-    a.setAttribute("download", props.selectedFileName);
+    a.setAttribute("download", props.selectedFilePath);
     document.body.appendChild(a);
     a.click();
     URL.revokeObjectURL(url);
@@ -44,7 +45,7 @@ const downloadFile = async () => {
     const url = window.URL.createObjectURL(data);
     const a = document.createElement("a");
     a.href = url;
-    a.setAttribute("download", props.selectedFileName);
+    a.setAttribute("download", props.selectedFilePath);
     document.body.appendChild(a);
     a.click();
     URL.revokeObjectURL(url);
@@ -76,7 +77,7 @@ onMounted(async () => {
       <iframe
         v-if="props.fileType === 'pdf'"
         :src="file"
-        class="w-[90vw] h-[75vh] rounded-lg object-contain  shadow-2xl ring-1 ring-white/10 border-none"
+        class="w-[90vw] h-[75vh] rounded-lg object-contain shadow-2xl ring-1 ring-white/10 border-none"
       ></iframe>
       <video
         v-if="props.fileType === 'vid'"
@@ -91,7 +92,7 @@ onMounted(async () => {
           class="w-6 h-6 invert cursor-pointer hover:opacity-80 transition-opacity"
           @click="downloadFile"
         />
-        <span class="text-white/70 text-sm">{{ props.selectedFileName }}</span>
+        <span class="text-white/70 text-sm">{{ props.selectedFilePath }}</span>
       </div>
     </div>
   </div>
