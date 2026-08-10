@@ -37,6 +37,7 @@ const getDir = async (path: string) => {
 
 const selectFile = (path: string) => {
   selectedFile.value = path;
+  fileIdx.value = onlyFilesData.value.indexOf(path);
 
   if (selectedFile.value.includes("pdf")) {
     fileType.value = "pdf";
@@ -124,22 +125,29 @@ const closeViewer = () => {
         :file-type="fileType"
         @close="closeViewer"
       ></Datadisplayer>
-      <div class="fixed z-50 right-2 bottom-100">
-        <button @click="next" :class="{ disable: checkLastItem }">
-          Forward
-        </button>
+      <div
+        class="fixed z-50 right-1 sm:right-2 md:right-4 bottom-4 sm:bottom-10 md:bottom-20 flex flex-col items-center"
+      >
+        <img
+          v-if="!checkLastItem"
+          @click="next"
+          src="../assets/next-svgrepo-com.svg"
+          class="w-10 h-14 sm:w-14 sm:h-20 md:w-20 md:h-30"
+          alt=""
+        />
       </div>
-      <div class="fixed z-50 left-2 bottom-100">
-        <button @click="backwards" :class="{ disable: checkFirstItem }">
-          Backwards
-        </button>
+
+      <div
+        class="fixed z-50 left-1 sm:left-2 md:left-4 bottom-4 sm:bottom-10 md:bottom-20 flex flex-col items-center"
+      >
+        <img
+          v-if="!checkFirstItem"
+          @click="backwards"
+          src="../assets/back-light-svgrepo-com.svg"
+          class="w-10 h-14 sm:w-14 sm:h-20 md:w-20 md:h-30"
+          alt=""
+        />
       </div>
     </div>
   </div>
 </template>
-<style>
-.disable {
-  color: blue;
-  font-weight: bold;
-}
-</style>
