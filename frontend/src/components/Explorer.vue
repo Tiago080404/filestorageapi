@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import Datadisplayer from "./Datadisplayer.vue";
+import FileUploader from "./FileUploader.vue";
 
 interface DirData {
   name: string;
@@ -13,6 +14,7 @@ const selectedFile = ref("");
 const fileType = ref("");
 const onlyFilesData = ref<string[]>([]);
 let fileIdx = ref(0);
+let fileAdd = ref(false);
 
 onMounted(async () => {
   await getData();
@@ -99,6 +101,11 @@ const closeViewer = () => {
 </script>
 <template>
   <div class="flex flex-row flex-wrap gap-4">
+    <img
+      @click="fileAdd = true"
+      src="../assets/uploadfile.svg"
+      class="w-10 h-4 sm:w-4 sm:h-10 md:w-10 md:h-9"
+    />
     <div v-for="data in dirs" class="flex flex-col items-center">
       <img
         @click="getDir(data.path)"
@@ -148,6 +155,9 @@ const closeViewer = () => {
           alt=""
         />
       </div>
+    </div>
+    <div v-if="fileAdd">
+      <FileUploader></FileUploader>
     </div>
   </div>
 </template>

@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fileserverapi/internal/auth"
 	"fileserverapi/internal/handlers"
 	"net/http"
 )
@@ -9,7 +8,7 @@ import (
 func Setup() *http.ServeMux {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("POST /api/upload", auth.ProtectedRoutes(handlers.Upload))
+	mux.HandleFunc("POST /api/upload", handlers.Upload)
 	mux.HandleFunc("GET /api/list", handlers.List)
 	mux.HandleFunc("GET /api/list/{path...}", handlers.ListFolder)
 	mux.HandleFunc("GET /api/download/{files...}", handlers.Download)
@@ -22,3 +21,5 @@ func Setup() *http.ServeMux {
 	mux.HandleFunc("GET /api/open/{file...}", handlers.OpenFile)
 	return mux
 }
+
+//auth.ProtectedRoutes()
