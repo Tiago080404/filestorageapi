@@ -35,7 +35,7 @@ jobs:
           password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Build
-        uses: docker/build-push-action@v5s
+        uses: docker/build-push-action@v5
         with:
           file: ./backend/Dockerfile
           push: true
