@@ -37,6 +37,7 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v5
         with:
+          context: ./backend
           file: ./backend/Dockerfile
           push: true
           tags: ghcr.io/tiago080404/filestorageapi:latest
