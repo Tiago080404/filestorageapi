@@ -5,30 +5,43 @@ name: Go
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.26.5"
+      - name: Install dependencies
+        run: |
+          cd backend 
+          go install ./...
+      - name: Test
+        run: |
+          cd backend
+          go test ./...
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.26.5'
-    - name: Install dependencies
-      run: |
-        cd backend 
-        go install ./...
-    - name: Build
-      run: |
-        cd backend 
-        go build -v ./...
-    - name: Test
-      run: |
-        cd backend
-        go test ./...
+      - name: "Login to GitHub Container Registry"
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Build
+        run: |
+        uses: docker/build-push-action@v5s
+        file: ./backend/Dockerfile
+        push: true
+        tags: ghcr.io/Tiago080404/filestorageapi:latest
+    # - name: Build Frontend
+    # uses: docker/build-push-action@v5s
+    #  with:
+    # context: ./frontend
+    #  file: ./frontend/Dockerfui
