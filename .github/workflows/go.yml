@@ -35,8 +35,8 @@ jobs:
           password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Build
+        uses: docker/build-push-action@v5s
         run: |
-          uses: docker/build-push-action@v5s
           file: ./backend/Dockerfile
           push: true
           tags: ghcr.io/Tiago080404/filestorageapi:latest
