@@ -107,15 +107,18 @@ const closeUploader = async () => {
   fileAdd.value = false;
   await getData();
 };
-/*   */
 </script>
 <template>
   <div class="flex flex-row flex-wrap gap-4">
-    <img
-      @click="fileAdd = true"
-      src="../assets/uploadfile.svg"
-      class="w-10 h-4 sm:w-4 sm:h-10 md:w-10 md:h-9"
-    />
+    <div class="flex flex-col items-center justify-center">
+
+
+      <img
+        @click="fileAdd = true"
+        src="../assets/uploadfile.svg"
+        class="w-20 h-20 p-2"
+      />
+    </div>
     <div v-for="data in dirs" class="flex flex-col items-center justify-center">
       <img
         @click="getDir(data.path)"
@@ -128,7 +131,7 @@ const closeUploader = async () => {
         @click="selectFile(data.path)"
         class="w-20 h-20 p-2"
         v-else
-        :src="`${apiUrl}api/preview/${data.path}`"
+        :src="`${apiUrl}api/preview/${data.name}`"
         loading="lazy"
         alt=""
       />

@@ -3,7 +3,8 @@ import { ref } from "vue";
 
 let selectedFiles = ref<File[]>([]);
 const emit = defineEmits(["close"]);
-
+let finishedUploadedFiles = 0;
+let percentage = ref(0);
 const handleFileSelect = (e: Event) => {
   const input = e.target as HTMLInputElement;
   const filesAsArray = Array.from(input?.files || []);
@@ -21,9 +22,11 @@ const uploadFiles = async () => {
       if (!file) return;
 
       await uploadFile(file);
+
+      percentage.value =
+        (finishedUploadedFiles * 100) / selectedFiles.value.length;
     }
   };
-
   const workers = Array.from({ length: Math.min(many, queue.length) }, () =>
     worker(),
   );
@@ -46,6 +49,7 @@ const uploadFile = async (file: File) => {
     throw new Error(`Could not upload ${file.name}`);
   }
 
+  finishedUploadedFiles = finishedUploadedFiles + 1;
   console.log(await response.text());
 };
 const close = () => {
@@ -120,6 +124,8 @@ const close = () => {
       >
         Upload {{ selectedFiles.length }} Dateien
       </button>
+      <progress :value="percentage" max="100"></progress>
+      <div>{{ Math.round(percentage) }}%</div>
     </div>
   </div>
 </template>
