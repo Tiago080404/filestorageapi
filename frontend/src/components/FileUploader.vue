@@ -11,21 +11,42 @@ const handleFileSelect = (e: Event) => {
 };
 
 const uploadFiles = async () => {
-  const url = `${import.meta.env.VITE_API_URL}api/upload`;
-  const formData = new FormData();
-  for (let i = 0; i < selectedFiles.value.length; i++) {
-    formData.append("files[]", selectedFiles.value[i]);
-    const response = await fetch(url, {
-      method: "POST",
-      body: formData,
-    });
-    if (!response.ok) {
-      console.log("could not upload");
-      return;
+  const many = 4;
+  const queue = [...selectedFiles.value];
+
+  const worker = async () => {
+    while (queue.length > 0) {
+      let file = queue.shift();
+
+      if (!file) return;
+
+      await uploadFile(file);
     }
-    console.log(await response.text());
-  }
+  };
+
+  const workers = Array.from({ length: Math.min(many, queue.length) }, () =>
+    worker(),
+  );
+  await Promise.all(workers);
   close();
+};
+
+const uploadFile = async (file: File) => {
+  const url = `${import.meta.env.VITE_API_URL}api/upload`;
+
+  const formData = new FormData();
+  formData.append("files[]", file);
+
+  const response = await fetch(url, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Could not upload ${file.name}`);
+  }
+
+  console.log(await response.text());
 };
 const close = () => {
   selectedFiles.value = [];
