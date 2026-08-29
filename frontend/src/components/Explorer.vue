@@ -15,6 +15,7 @@ const fileType = ref("");
 const onlyFilesData = ref<string[]>([]);
 let fileIdx = ref(0);
 let fileAdd = ref(false);
+const apiUrl = import.meta.env.VITE_API_URL;
 
 onMounted(async () => {
   await getData();
@@ -22,16 +23,19 @@ onMounted(async () => {
 });
 
 const getData = async () => {
-  const response = await fetch("http://localhost:8080/api/list", {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}api/list`, {
     method: "GET",
     //credentials: "include",
   });
   dirs.value = await response.json();
 };
 const getDir = async (path: string) => {
-  const response = await fetch(`http://localhost:8080/api/list/${path}`, {
-    method: "GET",
-  });
+  const response = await fetch(
+    `${import.meta.env.VITE_API_URL}api/list/${path}`,
+    {
+      method: "GET",
+    },
+  );
   dirs.value = await response.json();
   fileIdx.value = 0;
   getOnlyFiles();
@@ -93,11 +97,17 @@ const checkFirstItem = computed(() => {
   }
   return false;
 });
-const closeViewer = () => {
+const closeViewer = async () => {
   selectedFile.value = "";
   fileType.value = "";
   fileIdx.value = 0;
+  await getData();
 };
+const closeUploader = async () => {
+  fileAdd.value = false;
+  await getData();
+};
+/*   */
 </script>
 <template>
   <div class="flex flex-row flex-wrap gap-4">
@@ -106,7 +116,7 @@ const closeViewer = () => {
       src="../assets/uploadfile.svg"
       class="w-10 h-4 sm:w-4 sm:h-10 md:w-10 md:h-9"
     />
-    <div v-for="data in dirs" class="flex flex-col items-center">
+    <div v-for="data in dirs" class="flex flex-col items-center justify-center">
       <img
         @click="getDir(data.path)"
         class="w-20 h-30"
@@ -116,9 +126,10 @@ const closeViewer = () => {
       />
       <img
         @click="selectFile(data.path)"
-        class="w-20 h-30"
+        class="w-20 h-20 p-2"
         v-else
-        src="../assets/file.svg"
+        :src="`${apiUrl}api/preview/${data.path}`"
+        loading="lazy"
         alt=""
       />
       <p class="w-20 text-center text-sm truncate">{{ data.name }}</p>
@@ -157,7 +168,8 @@ const closeViewer = () => {
       </div>
     </div>
     <div v-if="fileAdd">
-      <FileUploader></FileUploader>
+      <FileUploader @close="closeUploader"></FileUploader>
     </div>
   </div>
 </template>
+<!-- vllt ein button auf der aktullen dir und dann kann man da selecten was man downloaden will oder ganzer ordner downloaden -->

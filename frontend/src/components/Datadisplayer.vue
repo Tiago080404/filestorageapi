@@ -10,7 +10,7 @@ const emit = defineEmits(["close"]);
 let file = ref("");
 
 const displayFile = async () => {
-  file.value = `http://localhost:8080/api/open/${props.selectedFilePath}`;
+  file.value = `${import.meta.env.VITE_API_URL}api/open/${props.selectedFilePath}`;
   console.log(file.value, props.fileType);
 };
 
@@ -22,7 +22,7 @@ const close = () => {
 const downloadFile = async () => {
   console.log();
   const response = await fetch(
-    `http://localhost:8080/api/download/${props.selectedFilePath}`,
+    `${import.meta.env.VITE_API_URL}api/download/${props.selectedFilePath}`,
     {
       method: "GET",
     },
@@ -50,6 +50,24 @@ const downloadFile = async () => {
     a.click();
     URL.revokeObjectURL(url);
     document.body.removeChild(a);
+  }
+};
+
+const deleteFile = async () => {
+  const response = await fetch(
+    `${import.meta.env.VITE_API_URL}api/remove`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({
+        path: props.selectedFilePath,
+      }),
+    },
+  );
+  if (!response.ok) {
+    console.log("Could not delete file");
+    return;
+  } else {
+    close();
   }
 };
 
@@ -93,6 +111,12 @@ onMounted(async () => {
           @click="downloadFile"
         />
         <span class="text-white/70 text-sm">{{ props.selectedFilePath }}</span>
+        <img
+          src="../assets/trashcan.svg"
+          alt=""
+          class="w-6"
+          @click="deleteFile"
+        />
       </div>
     </div>
   </div>
