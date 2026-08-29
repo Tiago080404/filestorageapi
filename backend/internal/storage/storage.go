@@ -287,3 +287,12 @@ func OpenFile(path string) ([]byte, error) {
 	}
 	return file, nil
 }
+
+func PreviewFile(path string) ([]byte, error) {
+	file, err := os.ReadFile(filepath.Join(mockDirPath, path))
+	if err != nil {
+		return nil, err
+	}
+
+	return file, nil
+}

@@ -204,6 +204,7 @@ func ListFolder(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(dir)
 }
+
 func OpenFile(w http.ResponseWriter, r *http.Request) {
 	fileToOpen := r.PathValue("file")
 
@@ -215,4 +216,18 @@ func OpenFile(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write(openedFile)
+}
+
+func PreviewFile(w http.ResponseWriter, r *http.Request) {
+	fileToPreview := r.PathValue("path")
+
+	preview, err := storage.PreviewFile(fileToPreview)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Cache-Control", "max-age=3600")
+	w.WriteHeader(http.StatusOK)
+	w.Write(preview)
 }
