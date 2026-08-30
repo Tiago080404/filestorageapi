@@ -261,7 +261,7 @@ func ListDir(path string) ([]byte, error) {
 
 	for _, file := range dir {
 		filePath := filepath.Join(path, file.Name())
-
+		log.Println("listdir func", filePath)
 		if file.IsDir() {
 			infos = append(infos, FileInfo{file.Name(), "", true, filePath})
 		} else {

@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import Datadisplayer from "./Datadisplayer.vue";
 import FileUploader from "./FileUploader.vue";
+import Navbar from "./Navbar.vue";
 
 interface DirData {
   name: string;
@@ -9,13 +10,16 @@ interface DirData {
   dir: boolean;
   path: string;
 }
-let dirs = ref<DirData[]>([]);
+
 const selectedFile = ref("");
 const fileType = ref("");
 const onlyFilesData = ref<string[]>([]);
+const apiUrl = import.meta.env.VITE_API_URL;
+
+let dirs = ref<DirData[]>([]);
 let fileIdx = ref(0);
 let fileAdd = ref(false);
-const apiUrl = import.meta.env.VITE_API_URL;
+let currentPath = ref("");
 
 onMounted(async () => {
   await getData();
@@ -23,13 +27,18 @@ onMounted(async () => {
 });
 
 const getData = async () => {
+  currentPath.value = "";
   const response = await fetch(`${import.meta.env.VITE_API_URL}api/list`, {
     method: "GET",
     //credentials: "include",
   });
   dirs.value = await response.json();
+  console.log(dirs.value);
 };
+
 const getDir = async (path: string) => {
+  console.log("getDir:", path);
+  currentPath.value = path;
   const response = await fetch(
     `${import.meta.env.VITE_API_URL}api/list/${path}`,
     {
@@ -37,6 +46,8 @@ const getDir = async (path: string) => {
     },
   );
   dirs.value = await response.json();
+  console.log(dirs.value);
+
   fileIdx.value = 0;
   getOnlyFiles();
 };
@@ -101,24 +112,35 @@ const closeViewer = async () => {
   selectedFile.value = "";
   fileType.value = "";
   fileIdx.value = 0;
-  await getData();
+  if (dirs.value[0].path.includes("/")) {
+    await getDir(currentPath.value);
+  } else {
+    await getData();
+  }
 };
 const closeUploader = async () => {
   fileAdd.value = false;
-  await getData();
+  if (dirs.value[0].path.includes("/")) {
+    await getDir(currentPath.value);
+  } else {
+    await getData();
+  }
+};
+const goFolder = async () => {
+  let pos = currentPath.value.lastIndexOf("/");
+  if (pos === -1) {
+    //homedir
+    await getData();
+  } else {
+    console.log(currentPath.value.slice(0, pos));
+    currentPath.value = currentPath.value.slice(0, pos);
+    await getDir(currentPath.value);
+  }
 };
 </script>
 <template>
   <div class="flex flex-row flex-wrap gap-4">
-    <div class="flex flex-col items-center justify-center">
-
-
-      <img
-        @click="fileAdd = true"
-        src="../assets/uploadfile.svg"
-        class="w-20 h-20 p-2"
-      />
-    </div>
+    <div class="flex flex-col items-center justify-center"></div>
     <div v-for="data in dirs" class="flex flex-col items-center justify-center">
       <img
         @click="getDir(data.path)"
@@ -172,6 +194,15 @@ const closeUploader = async () => {
     </div>
     <div v-if="fileAdd">
       <FileUploader @close="closeUploader"></FileUploader>
+    </div>
+
+    <div class="absolute bottom-0 right-0 left-0 rounded-lg bg-emerald-600">
+      <img
+        @click="fileAdd = true"
+        src="../assets/uploadfile.svg"
+        class="w-20 h-20 p-1"
+      />
+      <Navbar v-if="currentPath !== ''" @back="goFolder"></Navbar>
     </div>
   </div>
 </template>

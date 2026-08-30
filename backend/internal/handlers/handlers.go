@@ -193,9 +193,9 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 }
 
 func ListFolder(w http.ResponseWriter, r *http.Request) {
-	getDir := r.PathValue("path")
+	dirPath := r.PathValue("path")
 
-	dir, err := storage.ListDir(getDir)
+	dir, err := storage.ListDir(dirPath)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return

@@ -5,6 +5,7 @@ let selectedFiles = ref<File[]>([]);
 const emit = defineEmits(["close"]);
 let finishedUploadedFiles = 0;
 let percentage = ref(0);
+
 const handleFileSelect = (e: Event) => {
   const input = e.target as HTMLInputElement;
   const filesAsArray = Array.from(input?.files || []);
