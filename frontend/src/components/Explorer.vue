@@ -55,11 +55,11 @@ const getDir = async (path: string) => {
 const selectFile = (path: string) => {
   selectedFile.value = path;
   fileIdx.value = onlyFilesData.value.indexOf(path);
-
+  console.log(selectedFile.value)
   if (selectedFile.value.includes("pdf")) {
     fileType.value = "pdf";
   } else if (
-    selectedFile.value.includes("MOV") ||
+    selectedFile.value.includes("mov") ||
     selectedFile.value.includes("MP4")
   ) {
     fileType.value = "vid";
@@ -139,6 +139,20 @@ const goFolder = async () => {
 };
 </script>
 <template>
+  <div>
+    <div class="fixed bottom-0 left-0 right-0 z-50  rounded-lg bg-[#C5AB9F] shadow-md">
+      <div class="flex justify-center">
+
+        <img
+          @click="fileAdd = true"
+          src="../assets/uploadfile.svg"
+          class="w-15 h-15"
+        />
+        <Navbar v-if="currentPath !== ''" @back="goFolder"></Navbar>
+      </div>
+    </div>
+  </div>
+
   <div class="flex flex-row flex-wrap gap-4">
     <div class="flex flex-col items-center justify-center"></div>
     <div v-for="data in dirs" class="flex flex-col items-center justify-center">
@@ -194,15 +208,6 @@ const goFolder = async () => {
     </div>
     <div v-if="fileAdd">
       <FileUploader @close="closeUploader"></FileUploader>
-    </div>
-
-    <div class="absolute bottom-0 right-0 left-0 rounded-lg bg-emerald-600">
-      <img
-        @click="fileAdd = true"
-        src="../assets/uploadfile.svg"
-        class="w-20 h-20 p-1"
-      />
-      <Navbar v-if="currentPath !== ''" @back="goFolder"></Navbar>
     </div>
   </div>
 </template>
