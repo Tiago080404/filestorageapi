@@ -12,6 +12,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/disintegration/imaging"
 )
@@ -213,10 +214,18 @@ func MoveFile(old string, dest string) error {
 }
 
 func RenameData(newNamePath string, oldPath string) error {
-	err := os.Rename(oldPath, newNamePath)
+	//muss glaube mockdirpath rein
+	fileTypeIdx := strings.LastIndex(oldPath, ".")
+	log.Println("index", fileTypeIdx)
+	log.Println(oldPath[fileTypeIdx:])
+
+	fileType := oldPath[fileTypeIdx:]
+	newNamePath = newNamePath + fileType
+	log.Println(newNamePath, "old: ", oldPath)
+	err := os.Rename(filepath.Join(mockDirPath, oldPath), filepath.Join(mockDirPath, newNamePath))
 
 	if err != nil {
-		log.Println("Could not rename")
+		log.Println("Could not rename", err)
 		return err
 	}
 
@@ -225,7 +234,8 @@ func RenameData(newNamePath string, oldPath string) error {
 
 	err = os.Rename(path.Join(thumbnailPath, file), path.Join(thumbnailPath, newNameThumbnail))
 	if err != nil {
-		log.Println("Could not rename")
+		log.Println(err)
+		log.Println("Could not rename", err)
 		return err
 	}
 

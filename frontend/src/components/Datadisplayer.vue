@@ -8,6 +8,8 @@ const props = defineProps<{
 
 const emit = defineEmits(["close"]);
 let file = ref("");
+let changeFile = ref(false);
+let newFileName = ref("");
 
 const displayFile = async () => {
   file.value = `${import.meta.env.VITE_API_URL}api/open/${props.selectedFilePath}`;
@@ -54,15 +56,12 @@ const downloadFile = async () => {
 };
 
 const deleteFile = async () => {
-  const response = await fetch(
-    `${import.meta.env.VITE_API_URL}api/remove`,
-    {
-      method: "PATCH",
-      body: JSON.stringify({
-        path: props.selectedFilePath,
-      }),
-    },
-  );
+  const response = await fetch(`${import.meta.env.VITE_API_URL}api/remove`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      path: props.selectedFilePath,
+    }),
+  });
   if (!response.ok) {
     console.log("Could not delete file");
     return;
@@ -70,7 +69,26 @@ const deleteFile = async () => {
     close();
   }
 };
-
+const renameFile = async () => {
+  if (newFileName.value.length === 0) {
+    return;
+  }
+  
+  console.log(newFileName.value, props.selectedFilePath);
+  const response = await fetch(`${import.meta.env.VITE_API_URL}api/rename`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      newname: newFileName.value,
+      oldpath: props.selectedFilePath,
+    }),
+  });
+  if (!response.ok) {
+    console.log("could not rename");
+    return;
+  } else {
+    close();
+  }
+};
 onMounted(async () => {
   await displayFile();
 });
@@ -117,6 +135,24 @@ onMounted(async () => {
           class="w-6"
           @click="deleteFile"
         />
+        <img
+          v-if="!changeFile"
+          src="../assets/edit-svgrepo-com.svg"
+          @click="changeFile = true"
+          class="w-6"
+        />
+        <div v-if="changeFile">
+          <input
+            type="text"
+            v-model="newFileName"
+            class="border-gray-200 bg-gray-50 rounded-lg font-medium"
+          />
+          <img
+            src="../assets/edit-svgrepo-com.svg"
+            @click="renameFile"
+            class="w-6"
+          />
+        </div>
       </div>
     </div>
   </div>
