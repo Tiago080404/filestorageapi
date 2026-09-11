@@ -207,7 +207,7 @@ const goFolder = async () => {
       </div>
     </div>
     <div v-if="fileAdd">
-      <FileUploader @close="closeUploader"></FileUploader>
+      <FileUploader @close="closeUploader" :folder-path="currentPath"></FileUploader>
     </div>
   </div>
 </template>

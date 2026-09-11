@@ -27,8 +27,8 @@ type FileInfo struct {
 var mockDirPath = "/home/tiago/fileservertest/"
 var thumbnailPath = "/home/tiago/fileservertest/thumbnails"
 
-func UploadLocal(fileHeader *multipart.FileHeader) error {
-	path := filepath.Join(mockDirPath, fileHeader.Filename)
+func UploadLocal(fileHeader *multipart.FileHeader, filePath string) error {
+	path := filepath.Join(mockDirPath, filePath)
 	dst, err := os.Create(path)
 	if err != nil {
 		return err
@@ -39,6 +39,10 @@ func UploadLocal(fileHeader *multipart.FileHeader) error {
 		return err
 	}
 	_, err = io.Copy(dst, file)
+	if err != nil {
+		log.Println("could not copy data to file: ", err)
+		return err
+	}
 
 	if thumbnailExists(fileHeader.Filename) {
 		log.Println("Thumbnail already exists")

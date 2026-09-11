@@ -26,9 +26,15 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	files := r.MultipartForm.File["files[]"]
+	filePath := r.MultipartForm.Value["path"]
+
+	if len(filePath) == 0 {
+		http.Error(w, "filePath missing", http.StatusBadRequest)
+		return
+	}
 
 	for _, fileHeader := range files {
-		err = storage.UploadLocal(fileHeader)
+		err = storage.UploadLocal(fileHeader, filePath[0])
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

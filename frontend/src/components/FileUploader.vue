@@ -5,6 +5,9 @@ let selectedFiles = ref<File[]>([]);
 const emit = defineEmits(["close"]);
 let finishedUploadedFiles = 0;
 let percentage = ref(0);
+const props = defineProps<{
+  folderPath: string;
+}>();
 
 const handleFileSelect = (e: Event) => {
   const input = e.target as HTMLInputElement;
@@ -40,6 +43,7 @@ const uploadFile = async (file: File) => {
 
   const formData = new FormData();
   formData.append("files[]", file);
+  formData.append("path",`${props.folderPath}/${file.name}`)
 
   const response = await fetch(url, {
     method: "POST",
@@ -53,6 +57,7 @@ const uploadFile = async (file: File) => {
   finishedUploadedFiles = finishedUploadedFiles + 1;
   console.log(await response.text());
 };
+
 const close = () => {
   selectedFiles.value = [];
   emit("close");
