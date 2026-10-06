@@ -78,6 +78,7 @@ func GetHomeDir() ([]byte, error) {
 	return byteFiles, nil
 }
 func createThumbnail(fileName string) error {
+	//das muss gefixed werden wenn anderer ordner
 	log.Println("thumbnail does not exists")
 
 	file, err := os.Open(filepath.Join(mockDirPath, fileName))
@@ -303,7 +304,7 @@ func OpenFile(path string) ([]byte, error) {
 }
 
 func PreviewFile(path string) ([]byte, error) {
-	file, err := os.ReadFile(filepath.Join(mockDirPath, path))
+	file, err := os.ReadFile(filepath.Join(thumbnailPath, path))
 	if err != nil {
 		return nil, err
 	}
