@@ -44,7 +44,16 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tags: ghcr.io/tiago080404/filestorageapi:latest
+          tags: ghcr.io/tiago080404/filestorageapiBackend:latest
+
+      - name: Build Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ghcr.io/tiago080404/filestorageFrontend:latest
+          
     # - name: Build Frontend
     # uses: docker/build-push-action@v5s
     #  with:
