@@ -219,15 +219,8 @@ func MoveFile(old string, dest string) error {
 }
 
 func RenameData(newNamePath string, oldPath string) error {
-	//muss glaube mockdirpath rein
-	fileTypeIdx := strings.LastIndex(oldPath, ".")
-	log.Println("index", fileTypeIdx)
-	log.Println(oldPath[fileTypeIdx:])
-
-	fileType := oldPath[fileTypeIdx:]
-	newNamePath = newNamePath + fileType
-	log.Println(newNamePath, "old: ", oldPath)
-	err := os.Rename(filepath.Join(mockDirPath, oldPath), filepath.Join(mockDirPath, newNamePath))
+	pathPrefix := strings.LastIndex(oldPath, "/")
+	err := os.Rename(filepath.Join(mockDirPath, oldPath), filepath.Join(mockDirPath, oldPath[:pathPrefix], newNamePath))
 
 	if err != nil {
 		log.Println("Could not rename", err)

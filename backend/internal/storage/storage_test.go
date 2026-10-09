@@ -14,8 +14,12 @@ func TestRenameData(t *testing.T) {
 	thumbnailPath = thumbDir
 	defer func() { thumbnailPath = origThumbnailPath }()
 
+	origMockDirPath := mockDirPath
+	mockDirPath = ""
+	defer func() { mockDirPath = origMockDirPath }()
+
 	oldPath := filepath.Join(tmpDir, "old.JPG")
-	newPath := filepath.Join(tmpDir, "new.JPG")
+	newPath := filepath.Join("new.JPG")
 
 	err := os.WriteFile(oldPath, []byte("data"), 0644)
 	if err != nil {

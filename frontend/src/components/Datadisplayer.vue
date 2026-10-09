@@ -10,7 +10,7 @@ const emit = defineEmits(["close"]);
 let file = ref("");
 let changeFile = ref(false);
 let newFileName = ref("");
-
+console.log(props.selectedFilePath)
 const displayFile = async () => {
   file.value = `${import.meta.env.VITE_API_URL}api/open/${props.selectedFilePath}`;
   console.log(file.value, props.fileType);
