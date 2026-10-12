@@ -60,7 +60,7 @@ const selectFile = (path: string) => {
     fileType.value = "pdf";
   } else if (
     selectedFile.value.includes("mov") ||
-    selectedFile.value.includes("MP4")
+    selectedFile.value.includes("mp4")
   ) {
     fileType.value = "vid";
   } else {

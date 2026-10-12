@@ -25,6 +25,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	files := r.MultipartForm.File["files[]"]
 	filePath := r.MultipartForm.Value["path"]
 

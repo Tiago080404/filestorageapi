@@ -4,12 +4,14 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"image"
 	"image/jpeg"
 	"io"
 	"log"
 	"mime/multipart"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
@@ -77,9 +79,26 @@ func GetHomeDir() ([]byte, error) {
 
 	return byteFiles, nil
 }
+
+// todo
+func createVideoThumbnail(f *os.File, fileName string) error {
+	fmt.Println(f.Name())
+	fmt.Printf("%s/%s.png", thumbnailPath, fileName)
+	//output := filepath.Join(thumbnailPath,)
+	cmd := exec.Command("ffmpeg", "-i", fmt.Sprintf("%v", f.Name()), "-frames:v", "1", fmt.Sprintf("%s/%s.png", thumbnailPath, fileName))
+
+	err := cmd.Run()
+	if err != nil {
+		log.Print("Could not generate video thumb: ", err)
+		return err
+	}
+
+	return nil
+}
+
 func createThumbnail(fileName string) error {
 	//das muss gefixed werden wenn anderer ordner
-	log.Println("thumbnail does not exists")
+	log.Println("thumbnail does not exists", fileName)
 
 	file, err := os.Open(filepath.Join(mockDirPath, fileName))
 	if err != nil {
@@ -87,6 +106,14 @@ func createThumbnail(fileName string) error {
 		return err
 	}
 	defer file.Close()
+
+	if strings.Contains(fileName, "mov") || strings.Contains(fileName, "mp4") {
+		err := createVideoThumbnail(file, fileName)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
 
 	image, _, err := image.Decode(file)
 	if err != nil {
