@@ -20,10 +20,11 @@ import (
 )
 
 type FileInfo struct {
-	Name string `json:"name"`
-	Url  string `json:"url"`
-	Dir  bool   `json:"dir"`
-	Path string `json:"path"`
+	Name     string `json:"name"`
+	Url      string `json:"url"`
+	Dir      bool   `json:"dir"`
+	Path     string `json:"path"`
+	FileType string `json:"fileType"`
 }
 
 var mockDirPath = "/home/tiago/fileservertest/"
@@ -64,10 +65,11 @@ func GetHomeDir() ([]byte, error) {
 	}
 
 	for _, file := range dir {
+		dataType := path.Ext(file.Name())
 		if file.IsDir() {
-			infos = append(infos, FileInfo{Name: file.Name(), Url: "", Dir: true, Path: file.Name()})
+			infos = append(infos, FileInfo{Name: file.Name(), Url: "", Dir: true, Path: file.Name(), FileType: dataType})
 		} else {
-			infos = append(infos, FileInfo{Name: file.Name(), Url: "/thumbnail/" + file.Name(), Dir: false, Path: file.Name()})
+			infos = append(infos, FileInfo{Name: file.Name(), Url: "/thumbnail/" + file.Name(), Dir: false, Path: file.Name(), FileType: dataType})
 		}
 	}
 
@@ -84,7 +86,7 @@ func GetHomeDir() ([]byte, error) {
 func createVideoThumbnail(f *os.File, fileName string) error {
 	fmt.Println(f.Name())
 	fmt.Printf("%s/%s.png", thumbnailPath, fileName)
-	//output := filepath.Join(thumbnailPath,)
+
 	cmd := exec.Command("ffmpeg", "-i", fmt.Sprintf("%v", f.Name()), "-frames:v", "1", fmt.Sprintf("%s/%s.png", thumbnailPath, fileName))
 
 	err := cmd.Run()
@@ -107,7 +109,7 @@ func createThumbnail(fileName string) error {
 	}
 	defer file.Close()
 
-	if strings.Contains(fileName, "mov") || strings.Contains(fileName, "mp4") {
+	if strings.Contains(fileName, "MOV") || strings.Contains(fileName, "mp4") {
 		err := createVideoThumbnail(file, fileName)
 		if err != nil {
 			return err
@@ -281,11 +283,11 @@ func RemoveData(data string) error {
 	return nil
 }
 
-func ListDir(path string) ([]byte, error) {
+func ListDir(pathToFile string) ([]byte, error) {
 	var infos []FileInfo
 
 	basePath := "/home/tiago/fileservertest"
-	realPath := filepath.Join(basePath, path)
+	realPath := filepath.Join(basePath, pathToFile)
 
 	log.Println(realPath)
 	dir, err := os.ReadDir(realPath)
@@ -295,12 +297,13 @@ func ListDir(path string) ([]byte, error) {
 	}
 
 	for _, file := range dir {
-		filePath := filepath.Join(path, file.Name())
+		filePath := filepath.Join(pathToFile, file.Name())
 		log.Println("listdir func", filePath)
+		dataType := path.Ext(file.Name())
 		if file.IsDir() {
-			infos = append(infos, FileInfo{file.Name(), "", true, filePath})
+			infos = append(infos, FileInfo{file.Name(), "", true, filePath, dataType})
 		} else {
-			infos = append(infos, FileInfo{file.Name(), "/thumbnail/" + file.Name(), false, filePath})
+			infos = append(infos, FileInfo{file.Name(), "/thumbnail/" + file.Name(), false, filePath, dataType})
 		}
 	}
 
@@ -324,6 +327,12 @@ func OpenFile(path string) ([]byte, error) {
 }
 
 func PreviewFile(path string) ([]byte, error) {
+	log.Println(path)
+	if strings.Contains(path, "MOV") || strings.Contains(path, "mp4") {
+		path = path + ".png"
+		log.Println("mov path: ", path)
+	}
+
 	file, err := os.ReadFile(filepath.Join(thumbnailPath, path))
 	if err != nil {
 		return nil, err

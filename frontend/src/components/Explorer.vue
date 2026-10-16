@@ -9,8 +9,9 @@ interface DirData {
   url: string;
   dir: boolean;
   path: string;
+  fileType: string;
 }
-
+const validThumbnailFormat = [".MOV", ".mp4", ".png", ".jpg"];
 const selectedFile = ref("");
 const fileType = ref("");
 const onlyFilesData = ref<string[]>([]);
@@ -33,7 +34,8 @@ const getData = async () => {
     //credentials: "include",
   });
   dirs.value = await response.json();
-  console.log(dirs.value);
+  console.log(dirs.value[3].fileType);
+  console.log(validThumbnailFormat.includes(dirs.value[3].fileType));
 };
 
 const getDir = async (path: string) => {
@@ -55,11 +57,11 @@ const getDir = async (path: string) => {
 const selectFile = (path: string) => {
   selectedFile.value = path;
   fileIdx.value = onlyFilesData.value.indexOf(path);
-  console.log(selectedFile.value)
+  console.log(selectedFile.value);
   if (selectedFile.value.includes("pdf")) {
     fileType.value = "pdf";
   } else if (
-    selectedFile.value.includes("mov") ||
+    selectedFile.value.includes("MOV") ||
     selectedFile.value.includes("mp4")
   ) {
     fileType.value = "vid";
@@ -140,9 +142,10 @@ const goFolder = async () => {
 </script>
 <template>
   <div>
-    <div class="fixed bottom-0 left-0 right-0 z-50  rounded-lg bg-[#C5AB9F] shadow-md">
+    <div
+      class="fixed bottom-0 left-0 right-0 z-50 rounded-lg bg-[#C5AB9F] shadow-md"
+    >
       <div class="flex justify-center">
-
         <img
           @click="fileAdd = true"
           src="../assets/uploadfile.svg"
@@ -164,11 +167,17 @@ const goFolder = async () => {
         alt=""
       />
       <img
+        v-else-if="validThumbnailFormat.includes(data.fileType)"
         @click="selectFile(data.path)"
         class="w-20 h-20 p-2"
-        v-else
         :src="`${apiUrl}api/preview/${data.name}`"
         loading="lazy"
+      />
+      <img
+        v-else
+        src="../assets/file.svg"
+        @click="selectFile(data.path)"
+        class="w-20 h-20 p-2"
         alt=""
       />
       <p class="w-20 text-center text-sm truncate">{{ data.name }}</p>
@@ -207,7 +216,10 @@ const goFolder = async () => {
       </div>
     </div>
     <div v-if="fileAdd">
-      <FileUploader @close="closeUploader" :folder-path="currentPath"></FileUploader>
+      <FileUploader
+        @close="closeUploader"
+        :folder-path="currentPath"
+      ></FileUploader>
     </div>
   </div>
 </template>
