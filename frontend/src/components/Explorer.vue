@@ -34,8 +34,6 @@ const getData = async () => {
     //credentials: "include",
   });
   dirs.value = await response.json();
-  console.log(dirs.value[3].fileType);
-  console.log(validThumbnailFormat.includes(dirs.value[3].fileType));
 };
 
 const getDir = async (path: string) => {

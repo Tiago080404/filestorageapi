@@ -32,6 +32,7 @@ var thumbnailPath = "/home/tiago/fileservertest/thumbnails"
 
 func UploadLocal(fileHeader *multipart.FileHeader, filePath string) error {
 	path := filepath.Join(mockDirPath, filePath)
+	log.Println("importing file: ", path)
 	dst, err := os.Create(path)
 	if err != nil {
 		return err
@@ -50,7 +51,7 @@ func UploadLocal(fileHeader *multipart.FileHeader, filePath string) error {
 	if thumbnailExists(fileHeader.Filename) {
 		log.Println("Thumbnail already exists")
 	} else {
-		createThumbnail(fileHeader.Filename)
+		createThumbnail(fileHeader.Filename, filePath)
 	}
 
 	return err
@@ -98,11 +99,10 @@ func createVideoThumbnail(f *os.File, fileName string) error {
 	return nil
 }
 
-func createThumbnail(fileName string) error {
-	//das muss gefixed werden wenn anderer ordner
+func createThumbnail(fileName string, pathToFile string) error {
 	log.Println("thumbnail does not exists", fileName)
 
-	file, err := os.Open(filepath.Join(mockDirPath, fileName))
+	file, err := os.Open(filepath.Join(mockDirPath, pathToFile))
 	if err != nil {
 		log.Printf("could not open file: %s", err)
 		return err
