@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import Explorer from './components/Explorer.vue';
-
+import { RouterView } from "vue-router";
 </script>
 
 <template>
-  <Explorer></Explorer>
+  <RouterView />
 </template>

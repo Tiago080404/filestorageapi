@@ -20,6 +20,7 @@ func Setup() *http.ServeMux {
 	mux.HandleFunc("PATCH /api/remove", handlers.Remove)
 	mux.HandleFunc("GET /api/open/{file...}", handlers.OpenFile)
 	mux.HandleFunc("GET /api/preview/{path}", handlers.PreviewFile)
+	mux.HandleFunc("GET /api/me", handlers.GetMe)
 	return mux
 }
 

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fileserverapi/internal/auth"
 	"fileserverapi/internal/database"
 	"fileserverapi/internal/storage"
 	"log"
@@ -141,6 +142,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&registerReq)
 	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -238,4 +240,19 @@ func PreviewFile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "max-age=3600")
 	w.WriteHeader(http.StatusOK)
 	w.Write(preview)
+}
+
+func GetMe(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("auth")
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	if !auth.VerifyJWT(cookie.Value) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

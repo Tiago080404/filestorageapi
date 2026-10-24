@@ -62,15 +62,14 @@ func ProtectedRoutes(handler func(w http.ResponseWriter, r *http.Request)) func(
 }
 
 func VerifyJWT(cookie string) bool {
-	_, err := jwt.Parse(cookie, func(t *jwt.Token) (any, error) {
+	token, err := jwt.Parse(cookie, func(t *jwt.Token) (any, error) {
 		privateKey, err := os.ReadFile("../../token.pub")
 		if err != nil {
 			return nil, err
 		}
 		return jwt.ParseRSAPublicKeyFromPEM(privateKey)
 	})
-	if err != nil {
-		log.Println(err)
+	if err != nil || token == nil || !token.Valid {
 		return false
 	}
 
