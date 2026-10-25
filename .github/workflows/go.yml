@@ -53,9 +53,3 @@ jobs:
           file: ./frontend/Dockerfile
           push: true
           tags: ghcr.io/tiago080404/filestoragefrontend:latest
-          
-    # - name: Build Frontend
-    # uses: docker/build-push-action@v5s
-    #  with:
-    # context: ./frontend
-    #  file: ./frontend/Dockerfui

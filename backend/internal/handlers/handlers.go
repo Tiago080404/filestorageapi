@@ -110,7 +110,7 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 		Name:     "auth",
 		Value:    token,
 		Path:     "/",
-		MaxAge:   3600,
+		MaxAge:   3600 * 1000,
 		HttpOnly: true,
 		Secure:   r.URL.Scheme == "https",
 		SameSite: http.SameSiteLaxMode,

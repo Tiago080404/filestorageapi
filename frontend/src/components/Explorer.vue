@@ -34,6 +34,7 @@ const getData = async () => {
     //credentials: "include",
   });
   dirs.value = await response.json();
+  getOnlyFiles()
 };
 
 const getDir = async (path: string) => {
@@ -139,19 +140,27 @@ const goFolder = async () => {
 };
 </script>
 <template>
-  <div>
-    <div
-      class="fixed bottom-0 left-0 right-0 z-50 rounded-lg bg-[#C5AB9F] shadow-md"
+  <div
+    class="fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none"
+  >
+    <nav
+      class="pointer-events-auto flex items-center gap-2 rounded-full border border-neutral-200 bg-white/90 px-3 py-2 shadow-lg shadow-black/5 backdrop-blur-md"
     >
-      <div class="flex justify-center">
+      <Navbar v-if="currentPath !== ''" @back="goFolder" />
+
+      <button
+        type="button"
+        aria-label="Datei hochladen"
+        @click="fileAdd = true"
+        class="group flex h-12 w-12 items-center justify-center rounded-full bg-neutral-900 transition duration-200 ease-out hover:scale-105 hover:bg-neutral-700 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+      >
         <img
-          @click="fileAdd = true"
           src="../assets/uploadfile.svg"
-          class="w-15 h-15"
+          alt=""
+          class="h-6 w-6 brightness-0 invert transition-transform duration-200 group-hover:-translate-y-0.5"
         />
-        <Navbar v-if="currentPath !== ''" @back="goFolder"></Navbar>
-      </div>
-    </div>
+      </button>
+    </nav>
   </div>
 
   <div class="flex flex-row flex-wrap gap-4">
@@ -221,4 +230,3 @@ const goFolder = async () => {
     </div>
   </div>
 </template>
-<!-- vllt ein button auf der aktullen dir und dann kann man da selecten was man downloaden will oder ganzer ordner downloaden -->
